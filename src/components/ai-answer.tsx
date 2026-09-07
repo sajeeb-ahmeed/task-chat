@@ -4,8 +4,10 @@ import { useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Check, Copy } from 'lucide-react';
+import { formatAIResponse } from '@/lib/ai-response-format';
 
 export function AIAnswer({ content }: { content: string }) {
+  const formatted = formatAIResponse(content);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   return (
@@ -34,7 +36,7 @@ export function AIAnswer({ content }: { content: string }) {
             ),
           }}
         >
-          {content}
+          {formatted}
         </Markdown>
       </div>
       <button
@@ -42,7 +44,7 @@ export function AIAnswer({ content }: { content: string }) {
         aria-label={copied ? 'Answer copied' : 'Copy answer'}
         onClick={async () => {
           try {
-            await navigator.clipboard.writeText(content);
+            await navigator.clipboard.writeText(formatted);
             setCopied(true);
             setCopyError(false);
           } catch {

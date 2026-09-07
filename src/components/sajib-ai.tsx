@@ -70,7 +70,7 @@ export function SajibAI() {
       setError(
         cause instanceof Error && cause.name !== 'TimeoutError'
           ? cause instanceof TypeError
-            ? 'Connection interrupted. Your message is ready to try again.'
+            ? 'Could not reach this site. Your message is saved below. Check your connection, then send again.'
             : cause.message
           : 'The request timed out. Your message is ready to try again.',
       );
@@ -219,9 +219,12 @@ export function SajibAI() {
           }}
         >
           {error && (
-            <p className="sajib-ai-error" role="alert">
-              {error}
-            </p>
+            <div className="sajib-ai-error" role="alert">
+              <p>{error}</p>
+              <a href="https://sajib.dev.cv/" target="_blank" rel="noopener noreferrer">
+                Open Sajib’s portfolio instead <ArrowUpRight size={12} />
+              </a>
+            </div>
           )}
           <div className="sajib-ai-composer">
             <textarea

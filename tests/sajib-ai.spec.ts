@@ -1,6 +1,45 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+test('portfolio response protocol renders paragraphs, headings, lists and literal code', async ({
+  page,
+}) => {
+  const reply =
+    'SECTION: যোগাযোগ\nPARA: ইমেইল ব্যবহার করুন।\nPARA: আরও জানতে চাইলে বলুন।\nITEM: CRM platform\nITEM: AI assistant\nCODE_START: text\nPARA: literal inside code\nCODE_END';
+  await page.route('**/api/sajib-ai', (route) => route.fulfill({ json: { reply } }));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open Sajib AI' }).click();
+  await page.getByRole('textbox', { name: 'Message Sajib AI' }).fill('How do I contact Sajib?');
+  await page.getByRole('button', { name: 'Send to Sajib AI' }).click();
+  const answer = page.locator('.sajib-ai-markdown');
+  await expect(answer.getByRole('heading', { name: 'যোগাযোগ' })).toBeVisible();
+  await expect(answer.locator('p')).toHaveText(['ইমেইল ব্যবহার করুন।', 'আরও জানতে চাইলে বলুন।']);
+  await expect(answer.getByRole('listitem')).toHaveCount(2);
+  await expect(answer.locator('pre code')).toHaveText('PARA: literal inside code\n');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: 'tmp/ai-protocol-mobile.png' });
+});
+
+test('connection failure retains the draft and offers a separate reachable destination', async ({
+  page,
+}) => {
+  let calls = 0;
+  await page.route('**/api/sajib-ai', (route) => {
+    calls++;
+    return route.abort('timedout');
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open Sajib AI' }).click();
+  const input = page.getByRole('textbox', { name: 'Message Sajib AI' });
+  await input.fill('How do I contact Sajib?');
+  await page.getByRole('button', { name: 'Send to Sajib AI' }).click();
+  const error = page.getByRole('dialog').getByRole('alert');
+  await expect(error).toContainText('Could not reach this site');
+  await expect(input).toHaveValue('How do I contact Sajib?');
+  await expect(error.getByRole('link')).toHaveAttribute('href', 'https://sajib.dev.cv/');
+  expect(calls).toBe(1);
+});
+
 test('structured replies render safely with lists, code, tables and copy', async ({ page }) => {
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
   const reply =

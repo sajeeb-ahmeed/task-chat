@@ -441,3 +441,15 @@
     transition: none;
   }
 }
+.sajib-ai-error p {
+  margin: 0;
+}
+.sajib-ai-error a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  color: #244ac1;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
