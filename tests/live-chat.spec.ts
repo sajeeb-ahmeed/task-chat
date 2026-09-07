@@ -46,7 +46,10 @@ test('three users: direct and group delivery, pagination, scroll anchoring, draf
     await login(cleo, sessions[2]);
     await ada.getByRole('button', { name: 'New conversation', exact: true }).click();
     await ada.getByLabel('Search people by name or phone').fill('+' + sessions[1].user.phone);
-    await ada.getByRole('dialog').getByRole('button', { name: new RegExp(sessions[1].user.name) }).click();
+    await ada
+      .getByRole('dialog')
+      .getByRole('button', { name: new RegExp(sessions[1].user.name) })
+      .click();
     await expect(ada.getByLabel('Write a message')).toBeVisible();
     await expect(ada.getByText('Every good thread starts')).toBeVisible();
     await ada.getByLabel('Write a message').fill('   ');
@@ -119,9 +122,15 @@ test('three users: direct and group delivery, pagination, scroll anchoring, draf
     await ada.getByRole('button', { name: 'Create a group', exact: true }).click();
     await ada.getByLabel('Group name').fill(`Sunday Club ${stamp}`);
     await ada.getByLabel('Search people by name or phone').fill(`Thread Test ${stamp}`);
-    await ada.getByRole('dialog').getByRole('button', { name: new RegExp(sessions[1].user.name) }).click();
+    await ada
+      .getByRole('dialog')
+      .getByRole('button', { name: new RegExp(sessions[1].user.name) })
+      .click();
     await expect(ada.getByRole('button', { name: 'Create group', exact: true })).toBeDisabled();
-    await ada.getByRole('dialog').getByRole('button', { name: new RegExp(sessions[2].user.name) }).click();
+    await ada
+      .getByRole('dialog')
+      .getByRole('button', { name: new RegExp(sessions[2].user.name) })
+      .click();
     await ada.getByRole('button', { name: 'Create group', exact: true }).click();
     await expect(ada.getByRole('heading', { name: `Sunday Club ${stamp}` })).toBeVisible();
     await expect(ada.getByLabel('Write a message')).toHaveValue('');
