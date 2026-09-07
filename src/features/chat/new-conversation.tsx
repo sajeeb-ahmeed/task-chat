@@ -5,14 +5,204 @@ import { Search, X, Check, Users, MessageCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Session, User } from '@/lib/types';
 import { Avatar, Spinner } from '@/components/ui';
-export function NewConversation({ session, close, open }: { session: Session; close: () => void; open: (id: string) => void }) {
-  const dialog = useRef<HTMLDialogElement>(null); const client = useQueryClient();
-  const [group, setGroup] = useState(false); const [search, setSearch] = useState(''); const [q, setQ] = useState('');
-  const [name, setName] = useState(''); const [selected, setSelected] = useState<User[]>([]);
-  useEffect(() => { dialog.current?.showModal(); const el = dialog.current; return () => el?.close(); }, []);
-  useEffect(() => { const timer = setTimeout(() => setQ(search.trim()), 300); return () => clearTimeout(timer); }, [search]);
-  const results = useQuery({ queryKey: ['search', session.user._id, q], queryFn: ({ signal }) => api.search(session.token, q, signal), enabled: q.length > 0 });
-  const create = useMutation({ mutationFn: (person?: User) => group ? api.group(session.token, name.trim(), selected.map(p => p._id)) : api.direct(session.token, person!._id), onSuccess: async result => { await client.invalidateQueries({ queryKey: ['conversations'] }); open(result._id); close(); } });
-  const toggle = (person: User) => setSelected(old => old.some(p => p._id === person._id) ? old.filter(p => p._id !== person._id) : [...old, person]);
-  return <dialog ref={dialog} className="conversation-dialog" onCancel={close} onClick={e => { if (e.target === dialog.current && !create.isPending) close(); }}><div className="dialog-heading"><div><span className="eyebrow">MAKE A CONNECTION</span><h2>A new conversation.</h2></div><button className="icon-button" aria-label="Close dialog" onClick={close} disabled={create.isPending}><X size={20} /></button></div><div className="segmented"><button className={!group ? 'active' : ''} onClick={() => { setGroup(false); create.reset(); }}><MessageCircle size={16} /> Direct message</button><button className={group ? 'active' : ''} onClick={() => { setGroup(true); create.reset(); }}><Users size={16} /> Create a group</button></div>{group && <div className="group-name"><label htmlFor="group-name">Group name</label><input id="group-name" value={name} maxLength={100} onChange={e => setName(e.target.value)} placeholder="Give your people a place" /></div>}<label className="search-box"><Search size={18} /><input autoFocus aria-label="Search people by name or phone" placeholder="Search a name or phone number" value={search} onChange={e => setSearch(e.target.value)} /></label>{group && selected.length > 0 && <div className="selected-people">{selected.map(person => <button key={person._id} onClick={() => toggle(person)}>{person.name}<X size={13} /></button>)}</div>}<div className="people-results">{q.length === 0 ? <div className="small-empty"><Search size={24} /><p>Find someone to say hello to.</p><small>Search for an existing user by name or number.</small></div> : results.isPending ? <div className="status-line"><Spinner /> Finding your people…</div> : results.isError ? <div className="error-box" role="alert">{results.error.message}<button className="text-button" onClick={() => results.refetch()}>Try again</button></div> : results.data?.filter(p => p._id !== session.user._id).length === 0 ? <div className="small-empty"><p>No one found.</p><small>Try another name or ask them to sign in first.</small></div> : results.data?.filter(p => p._id !== session.user._id).map(person => <button className="person-row" key={person._id} disabled={create.isPending} onClick={() => group ? toggle(person) : create.mutate(person)}><Avatar name={person.name} /><span><strong>{person.name}</strong><small>{person.phone}</small></span>{group && <span className={`checkbox ${selected.some(p => p._id === person._id) ? 'checked' : ''}`}>{selected.some(p => p._id === person._id) && <Check size={13} />}</span>}</button>)}</div>{create.isError && <div className="error-box" role="alert">{create.error.message}</div>}{group ? <div className="dialog-footer"><small>{selected.length} selected · choose at least 2 people</small><button className="button" disabled={!name.trim() || selected.length < 2 || create.isPending} onClick={() => create.mutate(undefined)}>{create.isPending ? <Spinner /> : 'Create group'}</button></div> : create.isPending && <div className="status-line"><Spinner /> Opening conversation…</div>}</dialog>;
+export function NewConversation({
+  session,
+  close,
+  open,
+}: {
+  session: Session;
+  close: () => void;
+  open: (id: string) => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const client = useQueryClient();
+  const [group, setGroup] = useState(false);
+  const [search, setSearch] = useState('');
+  const [q, setQ] = useState('');
+  const [name, setName] = useState('');
+  const [selected, setSelected] = useState<User[]>([]);
+  useEffect(() => {
+    dialog.current?.showModal();
+    const el = dialog.current;
+    return () => el?.close();
+  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setQ(search.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+  const results = useQuery({
+    queryKey: ['search', session.user._id, q],
+    queryFn: ({ signal }) => api.search(session.token, q, signal),
+    enabled: q.length > 0,
+  });
+  const create = useMutation({
+    mutationFn: (person?: User) =>
+      group
+        ? api.group(
+            session.token,
+            name.trim(),
+            selected.map((p) => p._id),
+          )
+        : api.direct(session.token, person!._id),
+    onSuccess: async (result) => {
+      await client.invalidateQueries({ queryKey: ['conversations'] });
+      open(result._id);
+      close();
+    },
+  });
+  const toggle = (person: User) =>
+    setSelected((old) =>
+      old.some((p) => p._id === person._id)
+        ? old.filter((p) => p._id !== person._id)
+        : [...old, person],
+    );
+  return (
+    <dialog
+      ref={dialog}
+      className="conversation-dialog"
+      onCancel={close}
+      onClick={(e) => {
+        if (e.target === dialog.current && !create.isPending) close();
+      }}
+    >
+      <div className="dialog-heading">
+        <div>
+          <span className="eyebrow">MAKE A CONNECTION</span>
+          <h2>A new conversation.</h2>
+        </div>
+        <button
+          className="icon-button"
+          aria-label="Close dialog"
+          onClick={close}
+          disabled={create.isPending}
+        >
+          <X size={20} />
+        </button>
+      </div>
+      <div className="segmented">
+        <button
+          className={!group ? 'active' : ''}
+          onClick={() => {
+            setGroup(false);
+            create.reset();
+          }}
+        >
+          <MessageCircle size={16} /> Direct message
+        </button>
+        <button
+          className={group ? 'active' : ''}
+          onClick={() => {
+            setGroup(true);
+            create.reset();
+          }}
+        >
+          <Users size={16} /> Create a group
+        </button>
+      </div>
+      {group && (
+        <div className="group-name">
+          <label htmlFor="group-name">Group name</label>
+          <input
+            id="group-name"
+            value={name}
+            maxLength={100}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Give your people a place"
+          />
+        </div>
+      )}
+      <label className="search-box">
+        <Search size={18} />
+        <input
+          autoFocus
+          aria-label="Search people by name or phone"
+          placeholder="Search a name or phone number"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </label>
+      {group && selected.length > 0 && (
+        <div className="selected-people">
+          {selected.map((person) => (
+            <button key={person._id} onClick={() => toggle(person)}>
+              {person.name}
+              <X size={13} />
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="people-results">
+        {q.length === 0 ? (
+          <div className="small-empty">
+            <Search size={24} />
+            <p>Find someone to say hello to.</p>
+            <small>Search for an existing user by name or number.</small>
+          </div>
+        ) : results.isPending ? (
+          <div className="status-line">
+            <Spinner /> Finding your people…
+          </div>
+        ) : results.isError ? (
+          <div className="error-box" role="alert">
+            {results.error.message}
+            <button className="text-button" onClick={() => results.refetch()}>
+              Try again
+            </button>
+          </div>
+        ) : results.data?.filter((p) => p._id !== session.user._id).length === 0 ? (
+          <div className="small-empty">
+            <p>No one found.</p>
+            <small>Try another name or ask them to sign in first.</small>
+          </div>
+        ) : (
+          results.data
+            ?.filter((p) => p._id !== session.user._id)
+            .map((person) => (
+              <button
+                className="person-row"
+                key={person._id}
+                disabled={create.isPending}
+                onClick={() => (group ? toggle(person) : create.mutate(person))}
+              >
+                <Avatar name={person.name} />
+                <span>
+                  <strong>{person.name}</strong>
+                  <small>{person.phone}</small>
+                </span>
+                {group && (
+                  <span
+                    className={`checkbox ${selected.some((p) => p._id === person._id) ? 'checked' : ''}`}
+                  >
+                    {selected.some((p) => p._id === person._id) && <Check size={13} />}
+                  </span>
+                )}
+              </button>
+            ))
+        )}
+      </div>
+      {create.isError && (
+        <div className="error-box" role="alert">
+          {create.error.message}
+        </div>
+      )}
+      {group ? (
+        <div className="dialog-footer">
+          <small>{selected.length} selected · choose at least 2 people</small>
+          <button
+            className="button"
+            disabled={!name.trim() || selected.length < 2 || create.isPending}
+            onClick={() => create.mutate(undefined)}
+          >
+            {create.isPending ? <Spinner /> : 'Create group'}
+          </button>
+        </div>
+      ) : (
+        create.isPending && (
+          <div className="status-line">
+            <Spinner /> Opening conversation…
+          </div>
+        )
+      )}
+    </dialog>
+  );
 }

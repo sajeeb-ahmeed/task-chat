@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.netlify
+.vercel
+tmp
+package-lock.json
+test-results
+playwright-report

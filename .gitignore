@@ -2,6 +2,7 @@ node_modules/
 .next/
 out/
 .netlify/
+.vercel/
 .env*
 !.env.example
 tmp/
