@@ -171,7 +171,17 @@ export default function Home() {
       </section>
       <footer className="landing-footer">
         <Brand />
-        <span>Good conversations, uninterrupted.</span>
+        <span>
+          Designed &amp; built by{' '}
+          <a
+            className="footer-portfolio"
+            href="https://sajib.dev.cv/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Sajib Ahmed <ArrowUpRight size={13} aria-hidden="true" />
+          </a>
+        </span>
         <span>© {new Date().getFullYear()} Thread</span>
         <a href="#">Back to the top ↑</a>
       </footer>

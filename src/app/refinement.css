@@ -931,6 +931,17 @@ textarea::placeholder {
   font-size: 12px;
   color: var(--muted);
 }
+.footer-portfolio {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--ink);
+  font-weight: 600;
+}
+.footer-portfolio:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 @media (max-width: 1000px) {
   .conversation-sidebar {
     width: 290px;
