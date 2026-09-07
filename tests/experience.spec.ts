@@ -25,6 +25,23 @@ test('mobile landing and login fit the viewport and have no serious accessibilit
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
+    if (path === '/') {
+      // An overflow-hidden parent can conceal a broken preview without making
+      // the document wider. Check the actual content and interactive control.
+      for (const target of [
+        page.getByLabel('Interactive chat preview'),
+        page.getByRole('button', { name: 'Send a little hello' }),
+      ]) {
+        const bounds = await target.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.x).toBeGreaterThanOrEqual(0);
+        expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390);
+      }
+      await page.getByRole('button', { name: 'Send a little hello' }).click();
+      await page.getByRole('button', { name: '1 new message' }).click();
+      await expect(page.getByText('Count me in. Same corner café?')).toBeInViewport();
+      await page.getByRole('button', { name: 'Reset preview' }).click();
+    }
     const audit = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
       .analyze();
