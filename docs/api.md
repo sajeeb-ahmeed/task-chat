@@ -49,7 +49,7 @@ Use the oldest message's `_id` as `before`, not its timestamp. The observed ID c
 
 ## Errors and inconsistencies (observed)
 
-Error envelope: `{ error: { message: string, code: string, details?: { path: string, message: string }[] } }`.
+Error envelope: `{ error: { message: string, code: string | number, details?: { path: string, message: string }[] } }`. See [backend issue notes](backend-issues.md) for reproducible observations, frontend handling and remaining limitations.
 
 | Case | Status / code | Frontend handling |
 | --- | --- | --- |

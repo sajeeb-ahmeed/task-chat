@@ -1,0 +1,24 @@
+# Provided API: issues and frontend handling
+
+Assignment Part 3 asks candidates to describe API inconsistencies and how they handled them. This note records supplied-backend behavior; it does not claim to repair the backend.
+
+Source: https://frontend-task-chatapp.onrender.com/docs/ . REST base: `https://frontend-task-chatapp.onrender.com/api`.
+
+Rechecked on 7 September 2026 with isolated synthetic accounts and a conversation owned by those accounts. No real-user identities, JWTs, or private messages are included here. See [API contracts](api.md) for request/response structures and socket observations.
+
+| Observation | Reproduction and result | Frontend handling and remaining limitation |
+| --- | --- | --- |
+| Leading-plus phone search fails | Authenticated `GET /users/search?q=%2B<digits>` returns HTTP 500 with numeric error code `51091`. | Search strips presentation separators and `+` to avoid the invalid regex branch. Numeric lookup matches exact digit-only stored phones. Accounts stored with `+` must be found by name; the dialog explains this. Full phone-search interoperability remains blocked by the supplied API. |
+| Login distinguishes plus and digit-only identifiers | Create a synthetic account with `+<digits>`, then one with `<digits>`: they have different user IDs. Real browser regression tests confirm each account is retained at login/reload. | Preserve the entered leading `+` at login. Do not retry login under another identifier or merge accounts. Earlier Thread versions stripped `+`; the login hint explains signing into those older accounts without it. This is a backend identity behavior and a fixed frontend integration bug, not a claim that the backend violates a documented normalization contract. |
+| Whitespace accepted as a message | Authenticated `POST /messages` with a valid owned `conversationId` and `text: "   "` returns HTTP 200. | Trim message text and block empty submission in the composer and send function. Historical whitespace-only messages have an explicit empty-message fallback. Backend validation is still permissive. |
+| Pagination repeats the cursor item | Send at least two messages; fetch `?limit=1`; use the returned message ID as `before` in the next request. The next page includes that same ID. Reconfirmed. | Deduplicate by server ID, display chronological order, and stop on a non-advancing cursor. Preserve the visible row when prepending earlier history. The Swagger does not promise exclusive cursors, so this is a compatibility quirk rather than necessarily a contract violation. |
+| Invalid cursor returns a server error | Authenticated history request with `before=2026-09-07T00%3A00%3A00Z` returns HTTP 500 `SERVER_ERROR`. Earlier inspection exposed ObjectId cast detail. | Only pass server-issued message IDs. Display a generic server-error message instead of raw database details. Malformed cursor input should ideally receive a validation response from the backend. |
+| Missing-token status is inconsistent with invalid-token status | `GET /auth/me` without authorization returns HTTP 400 `NO_TOKEN`; an invalid Bearer token returns HTTP 401 `INVALID_TOKEN`. | Handle both as authentication failures when restoring/using a saved session; clear session/cache and return to login. |
+| Documented health endpoint is unavailable | `GET /api/health` returns HTTP 404 `NOT_FOUND`. | The frontend does not rely on the health endpoint. It reacts to actual request and socket connectivity outcomes. |
+| REST/socket message shapes differ | Earlier live observation: REST messages use `_id` and ISO `createdAt`; `message:new` uses `id` and a numeric millisecond timestamp. | Normalize the socket payload at the boundary, merge by server ID and reconcile history on reconnect. Contract unit tests and the live direct/group journey exercise this handling. This shape observation was not separately reprobed in the latest HTTP-only probe. |
+
+The Swagger is intentionally request-focused and omits response schemas/status codes. That omission is part of the assignment's documentation exercise, not itself a backend bug. `docs/api.md` records observed responses, including error codes that can be strings or numbers.
+
+No idempotency key is documented for message sending. A network timeout can leave delivery uncertain; the frontend preserves the draft, avoids automatic POST retry, and asks the user to check messages before explicitly unlocking a resend. This is a conservative design decision, not a claim that a timeout was observed to duplicate a message.
+
+Group rename, member administration and admin promotion are additional Swagger capabilities. They are documented separately, but not implemented as UI controls because the PDF explicitly requires group creation and messaging. Their response behavior has not been live verified and is not reported here as defective.
