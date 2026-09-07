@@ -5,6 +5,7 @@
 A responsive direct and group chat application, with an original landing page, built against the provided REST + Socket.io assignment API.
 
 <!-- DEMO_LINKS -->
+
 - **Landing page:** https://task-chat-mu.vercel.app
 - **Chat application:** https://task-chat-mu.vercel.app/chat
 - **Repository:** https://github.com/sajeeb-ahmeed/task-chat
@@ -134,4 +135,4 @@ The candidate supplied the brief, direction and request for incremental commits.
 
 The provided API controls persistence, availability and identity security. There is no custom mock backend in the delivered product, no file upload, no delivery/read receipts, and no group-admin editing UI. The check mark means the server accepted the message, not that another person read it. Group members/admin labels are visible; additional admin endpoints are documented separately.
 
-The PDF lists 22 August 2026 at 4:00 PM as its deadline and leaves the submission destination as a placeholder. Confirm the current deadline, timezone and actual destination before submitting. This repository is private by default; grant the evaluator access or explicitly choose public visibility. The repository and live links have not been sent to a recruiter.
+The PDF lists 22 August 2026 at 4:00 PM as its deadline and leaves the submission destination as a placeholder. Confirm the current deadline, timezone and actual destination before submitting. Before submission, verify that the repository and both live URLs are accessible from a signed-out browser. The repository and live links have not been sent to a recruiter.
