@@ -12,7 +12,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         <Providers>{children}</Providers>
-   
       </body>
     </html>
   );
