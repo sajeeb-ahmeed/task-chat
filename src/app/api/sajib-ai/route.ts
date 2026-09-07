@@ -1,3 +1,5 @@
+import { limitAI } from '../../../lib/ai-rate-limit';
+
 const ENDPOINT = 'https://sajib.dev.cv/api/sajib-agent.php';
 const MAX_BODY = 120000;
 
@@ -9,7 +11,12 @@ function error(message: string, status: number) {
 
 export async function POST(request: Request) {
   const origin = request.headers.get('origin');
-  if (origin && origin !== new URL(request.url).origin) return error('Invalid origin.', 403);
+  if (
+    !origin ||
+    origin !== new URL(request.url).origin ||
+    request.headers.get('sec-fetch-site') === 'cross-site'
+  )
+    return error('Invalid origin.', 403);
   if (!request.headers.get('content-type')?.includes('application/json')) {
     return error('Expected JSON.', 415);
   }
@@ -58,6 +65,20 @@ export async function POST(request: Request) {
   )
     return error('Invalid message history.', 400);
 
+  // Trust the hosting platform's client IP only on Vercel; elsewhere use a shared bucket.
+  const client =
+    process.env.VERCEL === '1'
+      ? request.headers.get('x-vercel-forwarded-for') || 'unknown'
+      : 'local';
+  const allowance = limitAI(client);
+  if (allowance.retryAfter)
+    return Response.json(
+      { error: 'Too many requests. Please wait a minute before trying again.' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(allowance.retryAfter), 'Cache-Control': 'no-store' },
+      },
+    );
   try {
     const upstream = await fetch(ENDPOINT, {
       method: 'POST',
@@ -71,6 +92,7 @@ export async function POST(request: Request) {
         website: '',
       }),
       cache: 'no-store',
+      redirect: 'error',
       signal: AbortSignal.timeout(45000),
     });
     if (!upstream.ok)
@@ -80,8 +102,22 @@ export async function POST(request: Request) {
           : 'Sajib AI is unavailable. Please try again.',
         upstream.status === 429 ? 429 : 502,
       );
-    const data = await upstream.json();
-    if (typeof data.reply !== 'string' || !data.reply.trim())
+    const reader = upstream.body?.getReader();
+    if (!reader) return error('Sajib AI returned an empty reply. Please try again.', 502);
+    const chunks: Uint8Array[] = [];
+    let bytes = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > 262144) {
+        await reader.cancel();
+        return error('The answer was too large. Please ask a shorter question.', 502);
+      }
+      chunks.push(value);
+    }
+    const data = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    if (!data || typeof data.reply !== 'string' || !data.reply.trim() || data.reply.length > 24000)
       return error('Sajib AI returned an empty reply. Please try again.', 502);
     // Never forward upstream cookies, recovery identities, or Thread credentials.
     return Response.json(
@@ -90,5 +126,7 @@ export async function POST(request: Request) {
     );
   } catch {
     return error('Sajib AI could not respond. Please try again shortly.', 502);
+  } finally {
+    allowance.release();
   }
 }

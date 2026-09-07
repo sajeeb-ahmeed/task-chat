@@ -4,12 +4,23 @@ import { POST } from './route';
 function request(body: unknown) {
   return new Request('http://localhost:3000/api/sajib-ai', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:3000' },
     body: JSON.stringify(body),
   });
 }
 afterEach(() => vi.unstubAllGlobals());
 describe('Sajib AI relay', () => {
+  it('rejects missing and foreign origins without upstream calls', async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    for (const origin of ['', 'https://unrelated.example']) {
+      const req = request({ message: 'hi', history: [] });
+      if (origin) req.headers.set('origin', origin);
+      else req.headers.delete('origin');
+      expect((await POST(req)).status).toBe(403);
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
   it('rejects malformed, oversized and system-role input before contacting the provider', async () => {
     const fetch = vi.fn();
     vi.stubGlobal('fetch', fetch);
