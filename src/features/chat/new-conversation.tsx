@@ -66,7 +66,11 @@ export function NewConversation({
     <dialog
       ref={dialog}
       className="conversation-dialog"
-      onCancel={close}
+      aria-labelledby="new-conversation-title"
+      onCancel={(event) => {
+        if (create.isPending) event.preventDefault();
+        else close();
+      }}
       onClick={(e) => {
         if (e.target === dialog.current && !create.isPending) close();
       }}
@@ -74,7 +78,7 @@ export function NewConversation({
       <div className="dialog-heading">
         <div>
           <span className="eyebrow">MAKE A CONNECTION</span>
-          <h2>A new conversation.</h2>
+          <h2 id="new-conversation-title">A new conversation.</h2>
         </div>
         <button
           className="icon-button"

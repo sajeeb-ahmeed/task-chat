@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, LogOut, MessageCircle, Plus, Search, Users } from 'lucide-react';
@@ -56,6 +56,7 @@ function Workspace({
 }) {
   const router = useRouter();
   const connected = useRealtime(session);
+  const [navigating, startNavigation] = useTransition();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [creating, setCreating] = useState(false);
@@ -71,7 +72,9 @@ function Workspace({
       conversationName(c).toLowerCase().includes(search.toLowerCase()) &&
       (filter === 'all' || c.type === filter),
   );
-  const open = (id: string) => router.push(`/chat/${id}`);
+  const open = (id: string) => {
+    if (id !== selectedId) startNavigation(() => router.push(`/chat/${id}`));
+  };
   return (
     <main className={`workspace ${selectedId ? 'has-selection' : ''}`}>
       <aside className="rail">
@@ -210,7 +213,12 @@ function Workspace({
           <span>{connected ? 'Connected. Ready when you are.' : 'Connecting to your people…'}</span>
         </footer>
       </aside>
-      {selected ? (
+      {navigating ? (
+        <section className="workspace-welcome" aria-busy="true" aria-label="Opening conversation">
+          <Spinner />
+          <p>Opening your conversation…</p>
+        </section>
+      ) : selected ? (
         <ChatPanel
           key={selected._id}
           conversation={selected}

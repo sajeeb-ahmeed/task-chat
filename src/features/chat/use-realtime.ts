@@ -33,7 +33,19 @@ export function useRealtime(session: Session) {
       void client.invalidateQueries({ queryKey: ['conversations'] });
     });
     socket.on('conversation:updated', reconcile);
+    const offline = () => {
+      setConnected(false);
+      socket.disconnect();
+    };
+    const online = () => {
+      socket.connect();
+      reconcile();
+    };
+    window.addEventListener('offline', offline);
+    window.addEventListener('online', online);
     return () => {
+      window.removeEventListener('offline', offline);
+      window.removeEventListener('online', online);
       socket.removeAllListeners();
       socket.disconnect();
     };
