@@ -103,6 +103,8 @@ The scroll implementation anchors a visible message row when earlier history is 
 
 ### Design reasoning
 
+The optional **Ask Sajib AI** launcher introduces the developer through his existing deployed portfolio assistant. It reuses the backend through a small server relay without adding a provider key to Thread. Assistant messages are separate from direct/group chats. See [integration and verification notes](docs/sajib-ai-integration.md) for its data flow and limitations.
+
 Thread uses white/ink surfaces, a restrained blue accent and Geist typography. The conversation carries the strongest contrast; navigation recedes, timestamps remain readable, and mobile inputs/buttons have more comfortable sizing. On mobile, the list and conversation become separate views to protect reading space. The [design refinement notes](docs/design-refinement.md) explain the current references, changes and visual QA.
 
 The landing page demonstrates a specific interaction rather than relying on generic feature claims: a new message waits while the visitor is reading. It is clearly labeled as a sample conversation. There are no fabricated testimonials or usage statistics. Contrast and keyboard behavior were adjusted after automated accessibility checks.
