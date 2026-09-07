@@ -1,12 +1,9 @@
 import Link from 'next/link';
-import { ArrowUpRight, LoaderCircle } from 'lucide-react';
+import { ArrowUpRight, LoaderCircle, MessagesSquare, Users } from 'lucide-react';
 export function Brand({ light = false }: { light?: boolean }) {
   return (
     <Link href="/" className={`brand ${light ? 'brand-light' : ''}`} aria-label="Thread home">
-      <span className="brand-mark">
-        <i />
-        <i />
-      </span>
+      <MessagesSquare className="brand-mark" strokeWidth={1.9} aria-hidden="true" />
       thread<span className="brand-period">.</span>
     </Link>
   );
@@ -24,15 +21,17 @@ export function Avatar({
   const color = palette[[...name].reduce((sum, c) => sum + c.charCodeAt(0), 0) % palette.length];
   return (
     <span className={`avatar ${color} ${size}`} aria-hidden="true">
-      {group
-        ? '#'
-        : name
-            .split(' ')
-            .filter(Boolean)
-            .slice(0, 2)
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()}
+      {group ? (
+        <Users size={18} />
+      ) : (
+        name
+          .split(' ')
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase()
+      )}
     </span>
   );
 }

@@ -1,7 +1,15 @@
 'use client';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowLeft, ArrowUp, Check, ChevronUp, Users } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowUp,
+  Check,
+  ChevronUp,
+  Users,
+  MessageCircle,
+} from 'lucide-react';
 import { api, ApiError } from '@/lib/api';
 import { canSend, isNearBottom, nextCursor, orderedMessages } from '@/lib/messages';
 import { conversationName, type Conversation, type Message, type Session } from '@/lib/types';
@@ -264,7 +272,12 @@ export function ChatPanel({
               )}
               {!messages.length && (
                 <div className="conversation-start">
-                  <span className="start-mark">“</span>
+                  <MessageCircle
+                    className="start-mark"
+                    size={42}
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
                   <h3>
                     Every good thread starts
                     <br />

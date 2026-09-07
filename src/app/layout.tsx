@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Providers } from '@/components/providers';
 import './globals.css';
+import './refinement.css';
 export const metadata: Metadata = {
   title: { default: 'Thread — Good conversations, uninterrupted.', template: '%s · Thread' },
   description:

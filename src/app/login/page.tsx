@@ -62,7 +62,7 @@ export default function LoginPage() {
           <ArrowLeft size={16} /> Back to home
         </Link>
         <div className="login-form-wrap">
-          <span className="eyebrow">LET’S GET YOU SETTLED</span>
+          <span className="eyebrow">WELCOME TO THREAD</span>
           <h2>Your people await.</h2>
           <p>Just your name and number. We’ll take it from here.</p>
           {!ready ? (
@@ -105,10 +105,15 @@ export default function LoginPage() {
                 aria-describedby="phone-hint"
               />
               <small id="phone-hint">
-                Include your country code. Keep + if your account was created with it. If your
-                earlier Thread conversations are missing, try signing in without +. New numbers
-                create an account automatically.
+                Include your country code. New numbers create an account automatically.
               </small>
+              <details className="phone-help">
+                <summary>Signing into an existing account?</summary>
+                <p>
+                  Keep + if your account was created with it. If your earlier Thread conversations
+                  are missing, try signing in without +.
+                </p>
+              </details>
               {error && (
                 <div className="error-box" role="alert">
                   {error}

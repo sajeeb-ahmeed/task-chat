@@ -92,6 +92,7 @@ export function NewConversation({
       <div className="segmented">
         <button
           className={!group ? 'active' : ''}
+          aria-pressed={!group}
           onClick={() => {
             setGroup(false);
             create.reset();
@@ -101,6 +102,7 @@ export function NewConversation({
         </button>
         <button
           className={group ? 'active' : ''}
+          aria-pressed={group}
           onClick={() => {
             setGroup(true);
             create.reset();
@@ -176,6 +178,7 @@ export function NewConversation({
                 className="person-row"
                 key={person._id}
                 disabled={create.isPending}
+                aria-pressed={group ? selected.some((p) => p._id === person._id) : undefined}
                 onClick={() => (group ? toggle(person) : create.mutate(person))}
               >
                 <Avatar name={person.name} />

@@ -108,7 +108,7 @@ function Workspace({
       <aside className="conversation-sidebar">
         <header className="sidebar-title">
           <div>
-            <span className="eyebrow">YOUR LITTLE CORNER</span>
+            <span className="eyebrow">YOUR WORKSPACE</span>
             <h1>
               Conversations<span>.</span>
             </h1>
@@ -139,6 +139,7 @@ function Workspace({
             <button
               key={value}
               className={filter === value ? 'active' : ''}
+              aria-pressed={filter === value}
               onClick={() => setFilter(value)}
             >
               {label}
@@ -229,10 +230,7 @@ function Workspace({
       ) : (
         <section className="workspace-welcome">
           <div className="welcome-orbit">
-            <span className="orbit-one" />
-            <span className="orbit-two" />
             <MessageCircle size={46} strokeWidth={1.2} />
-            <span className="orbit-dot" />
           </div>
           <span className="eyebrow">HELLO, {session.user.name.split(' ')[0].toUpperCase()}</span>
           <h2>
