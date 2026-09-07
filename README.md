@@ -111,7 +111,7 @@ The landing page demonstrates a specific interaction rather than relying on gene
 
 The main findings were different REST/socket message IDs and timestamp types, inclusive pagination, inconsistent authentication status codes, whitespace accepted as a message, and a phone-search regex bug. Full examples and workaround boundaries are in [docs/api.md](docs/api.md).
 
-Registration and numeric lookup use the same digit-only international phone format. Existing backend users whose numbers include `+` must be found by name because of the backend's exact-match/regex branching. A malformed timestamp cursor returns a server error, so the client only sends message IDs. The documented `/api/health` route returned 404 and is not used.
+Login preserves a leading `+` and removes presentation separators only: the backend treats plus-prefixed and digit-only numbers as different accounts. Earlier Thread versions stripped `+` on registration, so those accounts must sign in without it. No automatic alternate-number login or account merging is attempted. Search alone strips `+` to avoid the backend regex error; users stored with `+` must be found by name, as the search dialog explains. Regression tests verify both stored identity formats through login and reload. A malformed timestamp cursor returns a server error, so the client only sends message IDs. The documented `/api/health` route returned 404 and is not used.
 
 ### AI use — transparent disclosure
 

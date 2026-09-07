@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, MessageCircle, Check } from 'lucide-react';
 import { Brand, Spinner } from '@/components/ui';
 import { useAuth } from '@/components/providers';
 import { api } from '@/lib/api';
+import { normalizePhone } from '@/lib/identity';
 export default function LoginPage() {
   const { session, login, ready, error: restoreError, retry, logout } = useAuth();
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function LoginPage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError('');
-    const normalized = phone.replace(/[\s()-]/g, '');
+    const normalized = normalizePhone(phone);
     if (!name.trim()) return setError('Please enter your name.');
     if (!/^\+?\d{7,15}$/.test(normalized))
       return setError('Enter a phone number with 7–15 digits, including your country code.');
@@ -104,7 +105,9 @@ export default function LoginPage() {
                 aria-describedby="phone-hint"
               />
               <small id="phone-hint">
-                Include your country code. New here? An account is created automatically.
+                Include your country code. Keep + if your account was created with it. If your
+                earlier Thread conversations are missing, try signing in without +. New numbers
+                create an account automatically.
               </small>
               {error && (
                 <div className="error-box" role="alert">

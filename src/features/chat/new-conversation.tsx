@@ -126,11 +126,15 @@ export function NewConversation({
         <input
           ref={searchInput}
           aria-label="Search people by name or phone"
+          aria-describedby="people-search-hint"
           placeholder="Search a name or phone number"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </label>
+      <small id="people-search-hint">
+        Use a full phone number or a name. For numbers registered with +, search by name.
+      </small>
       {group && selected.length > 0 && (
         <div className="selected-people">
           {selected.map((person) => (
