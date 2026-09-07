@@ -164,24 +164,26 @@
   color: #626c7d;
 }
 .sajib-ai-message-user > p {
+  width: fit-content;
+  max-width: 85%;
   margin: 0;
-  padding: 13px 15px;
-  border-radius: 14px;
-  background: #f2f5f9;
+  padding: 10px 14px;
+  border-radius: 16px 16px 5px 16px;
+  background: #315eea;
+  color: #fff;
   font-size: 14px;
   line-height: 1.7;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 .sajib-ai-message-user {
-  margin-left: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 0;
 }
 .sajib-ai-message-user strong {
   text-align: right;
-}
-.sajib-ai-message-user p {
-  background: #315eea;
-  color: #fff;
 }
 .sajib-ai-thinking {
   font-size: 12px;

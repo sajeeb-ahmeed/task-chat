@@ -121,3 +121,37 @@ test('mobile AI dialog fits and has no serious accessibility violations', async 
   );
   await page.screenshot({ path: 'tmp/sajib-ai-mobile.png' });
 });
+
+test('user bubbles fit short messages and wrap long content on desktop and mobile', async ({
+  page,
+}) => {
+  await page.route('**/api/sajib-ai', (route) =>
+    route.fulfill({ json: { reply: 'Happy to help.' } }),
+  );
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Open Sajib AI' }).click();
+    const input = page.getByRole('textbox', { name: 'Message Sajib AI' });
+    await input.fill('whatsapp');
+    await page.getByRole('button', { name: 'Send to Sajib AI' }).click();
+    await expect(page.getByText('Happy to help.', { exact: true })).toBeVisible();
+    const first = page.locator('.sajib-ai-message-user > p').first();
+    const short = (await first.boundingBox())!;
+    const row = (await page.locator('.sajib-ai-message-user').first().boundingBox())!;
+    expect(short.width).toBeLessThan(row.width * 0.6);
+    expect(Math.abs(short.x + short.width - row.x - row.width)).toBeLessThan(2);
+    await page.screenshot({ path: `tmp/ai-short-bubble-${width}.png` });
+    await input.fill(
+      'Tell me about your projects and engineering experience. '.repeat(4) + 'x'.repeat(100),
+    );
+    await page.getByRole('button', { name: 'Send to Sajib AI' }).click();
+    await expect(page.getByText('Happy to help.', { exact: true })).toHaveCount(2);
+    const last = page.locator('.sajib-ai-message-user > p').last();
+    const long = (await last.boundingBox())!;
+    expect(long.width).toBeGreaterThan(short.width);
+    expect(long.height).toBeGreaterThan(short.height);
+    expect(await last.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+    await page.screenshot({ path: `tmp/ai-bubble-${width}.png` });
+  }
+});
