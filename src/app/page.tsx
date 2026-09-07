@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SajibAI } from '@/components/sajib-ai';
 import {
   ArrowDown,
   ArrowUpRight,
@@ -14,7 +15,8 @@ import { Brand } from '@/components/ui';
 import { ChatPreview } from '@/features/landing/chat-preview';
 export default function Home() {
   return (
-    <main className="landing">
+  <>
+      <main className="landing">
       <nav className="landing-nav" aria-label="Main navigation">
         <Brand />
         <div className="nav-center">
@@ -186,5 +188,8 @@ export default function Home() {
         <a href="#">Back to the top ↑</a>
       </footer>
     </main>
+    <SajibAI />
+  </>
+    
   );
 }
