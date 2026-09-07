@@ -49,9 +49,9 @@
   inset: auto 24px 24px auto;
   margin: 0;
   padding: 0;
-  width: 410px;
+  width: 460px;
   max-width: calc(100vw - 32px);
-  height: 610px;
+  height: 660px;
   max-height: calc(100dvh - 48px);
   border: 1px solid #dce2eb;
   border-radius: 22px;
@@ -157,13 +157,13 @@
 .sajib-ai-message {
   margin-top: 20px;
 }
-.sajib-ai-message strong {
+.sajib-ai-message > strong {
   display: block;
   margin-bottom: 7px;
   font-size: 11px;
   color: #626c7d;
 }
-.sajib-ai-message p {
+.sajib-ai-message-user > p {
   margin: 0;
   padding: 13px 15px;
   border-radius: 14px;
@@ -281,5 +281,163 @@
   .sajib-ai-composer button {
     width: 44px;
     height: 44px;
+  }
+}
+.sajib-ai-launcher {
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.sajib-ai-launcher:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px #17202e24;
+}
+.sajib-ai-header {
+  background: #f8faff;
+}
+.sajib-ai-markdown {
+  font-size: 14px;
+  line-height: 1.75;
+  color: #303c50;
+  overflow-wrap: anywhere;
+}
+.sajib-ai-markdown > :first-child {
+  margin-top: 0;
+}
+.sajib-ai-markdown > :last-child {
+  margin-bottom: 0;
+}
+.sajib-ai-markdown p {
+  margin: 0 0 12px;
+  white-space: pre-wrap;
+}
+.sajib-ai-markdown h3,
+.sajib-ai-markdown h4,
+.sajib-ai-markdown h5,
+.sajib-ai-markdown h6 {
+  color: #17202e;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 20px 0 8px;
+  letter-spacing: -0.2px;
+}
+.sajib-ai-markdown strong {
+  display: inline;
+  color: #17202e;
+  font-weight: 650;
+}
+.sajib-ai-markdown ul,
+.sajib-ai-markdown ol {
+  padding-left: 22px;
+  margin: 10px 0 16px;
+  list-style-position: outside;
+}
+.sajib-ai-markdown ul {
+  list-style-type: disc;
+}
+.sajib-ai-markdown ol {
+  list-style-type: decimal;
+}
+.sajib-ai-markdown li {
+  padding-left: 3px;
+  margin: 7px 0;
+}
+.sajib-ai-markdown li > p {
+  margin-bottom: 5px;
+}
+.sajib-ai-markdown a {
+  color: #244ac1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sajib-ai-markdown blockquote {
+  border-left: 3px solid #b9c9f8;
+  margin: 15px 0;
+  padding: 8px 14px;
+  background: #f6f8fe;
+}
+.sajib-ai-markdown code {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #edf1f7;
+}
+.sajib-ai-markdown pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 15px;
+  border-radius: 12px;
+  margin: 12px 0;
+  background: #172337;
+  color: #edf2ff;
+  line-height: 1.65;
+}
+.sajib-ai-markdown pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  white-space: pre;
+}
+.sajib-ai-markdown hr {
+  border: 0;
+  border-top: 1px solid #e1e7f0;
+  margin: 20px 0;
+}
+.sajib-ai-table {
+  overflow-x: auto;
+  margin: 12px 0;
+  border: 1px solid #dce2eb;
+  border-radius: 10px;
+}
+.sajib-ai-table table {
+  border-collapse: collapse;
+  min-width: 100%;
+  font-size: 12px;
+}
+.sajib-ai-table th,
+.sajib-ai-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e1e7f0;
+  text-align: left;
+  min-width: 100px;
+}
+.sajib-ai-table th {
+  background: #f2f5fb;
+  font-weight: 650;
+}
+.sajib-ai-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 0;
+  background: none;
+  color: #626c7d;
+  font-size: 11px;
+  cursor: pointer;
+}
+.sajib-ai-copy-error {
+  font-size: 11px;
+  margin-left: 8px;
+  color: #a32f31;
+}
+.sajib-ai-jump {
+  align-self: center;
+  margin: 0 0 8px;
+  padding: 8px 14px;
+  border: 1px solid #c7d4f8;
+  border-radius: 24px;
+  background: #edf2ff;
+  color: #244ac1;
+  font-size: 12px;
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sajib-ai-launcher {
+    transition: none;
   }
 }

@@ -1,6 +1,35 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+test('structured replies render safely with lists, code, tables and copy', async ({ page }) => {
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  const reply =
+    '## Projects\n\n**Selected work** with `TypeScript`.\n\n- CRM platform\n- AI assistant\n\n```ts\nconst answer = 42;\n```\n\n| Project | Stack |\n| --- | --- |\n| CRM | React |\n\n[Portfolio](https://sajib.dev.cv/)\n\n[Unsafe](javascript:alert(1))\n\n<img src="https://example.com/tracker" onerror="alert(1)">';
+  await page.route('**/api/sajib-ai', (route) => route.fulfill({ json: { reply } }));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open Sajib AI' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Sajib AI' });
+  await page.getByRole('textbox', { name: 'Message Sajib AI' }).fill('Show structured projects');
+  await page.getByRole('button', { name: 'Send to Sajib AI' }).click();
+  await expect(dialog.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+  await expect(dialog.getByRole('listitem')).toHaveCount(2);
+  await expect(dialog.locator('pre code')).toHaveText('const answer = 42;\n');
+  await expect(dialog.getByRole('table')).toBeVisible();
+  await expect(dialog.getByRole('link', { name: 'Portfolio', exact: true })).toHaveAttribute(
+    'rel',
+    'noopener noreferrer',
+  );
+  await expect(dialog.locator('img, script, a[href^="javascript:"]')).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Copy answer' }).click();
+  expect((await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, '\n')).toBe(
+    reply,
+  );
+  await page.screenshot({ path: 'tmp/ai-structured-desktop.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+  await page.screenshot({ path: 'tmp/ai-structured-mobile.png' });
+});
+
 test('AI launcher isolates messages, recovers failures and restores focus', async ({ page }) => {
   const payloads: { message: string; history: unknown[] }[] = [];
   await page.route('**/api/sajib-ai', async (route) => {

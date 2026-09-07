@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { ArrowUpRight, Bot, RotateCcw, Send, X } from 'lucide-react';
 import './sajib-ai.css';
+import { AIAnswer } from './ai-answer';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -12,19 +13,22 @@ export function SajibAI() {
   const dialog = useRef<HTMLDialogElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const messagesEnd = useRef<HTMLDivElement>(null);
+  const transcript = useRef<HTMLDivElement>(null);
+  const nearBottom = useRef(true);
   const locked = useRef(false);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
+  const [unread, setUnread] = useState(false);
 
   useEffect(() => {
     if (open) dialog.current?.showModal();
     else dialog.current?.close();
   }, [open]);
   useEffect(() => {
-    if (open) messagesEnd.current?.scrollIntoView({ block: 'nearest' });
+    if (open && nearBottom.current) messagesEnd.current?.scrollIntoView({ block: 'nearest' });
   }, [messages, pending, open]);
 
   async function send() {
@@ -32,6 +36,8 @@ export function SajibAI() {
     if (!content || locked.current) return;
     locked.current = true;
     setPending(true);
+    nearBottom.current = true;
+    setUnread(false);
     setError('');
     const next: Message[] = [...messages, { role: 'user', content }];
     setMessages(next);
@@ -57,12 +63,15 @@ export function SajibAI() {
         );
       }
       setMessages([...next, { role: 'assistant', content: data.reply }]);
+      if (!nearBottom.current) setUnread(true);
     } catch (cause) {
       setMessages(messages);
       setDraft(content);
       setError(
         cause instanceof Error && cause.name !== 'TimeoutError'
-          ? cause.message
+          ? cause instanceof TypeError
+            ? 'Connection interrupted. Your message is ready to try again.'
+            : cause.message
           : 'The request timed out. Your message is ready to try again.',
       );
     } finally {
@@ -113,6 +122,8 @@ export function SajibAI() {
               setMessages([]);
               setError('');
               setDraft('');
+              setUnread(false);
+              nearBottom.current = true;
               input.current?.focus();
             }}
           >
@@ -128,22 +139,33 @@ export function SajibAI() {
         </header>
         <div
           className="sajib-ai-transcript"
+          ref={transcript}
+          onScroll={() => {
+            const element = transcript.current;
+            if (element) {
+              nearBottom.current =
+                element.scrollHeight - element.scrollTop - element.clientHeight < 80;
+              if (nearBottom.current) setUnread(false);
+            }
+          }}
           role="log"
           aria-label="Sajib AI conversation"
           aria-live="polite"
           aria-relevant="additions text"
         >
-          <div className="sajib-ai-welcome">
-            <span>MEET THE DEVELOPER</span>
-            <h3>A little more about Sajib.</h3>
-            <p>
-              I’m Sajib’s AI representative. Ask about his projects, engineering experience, or
-              skills.
-            </p>
-            <a href="https://sajib.dev.cv/" target="_blank" rel="noopener noreferrer">
-              Explore the portfolio <ArrowUpRight size={14} />
-            </a>
-          </div>
+          {messages.length === 0 && (
+            <div className="sajib-ai-welcome">
+              <span>MEET THE DEVELOPER</span>
+              <h3>A little more about Sajib.</h3>
+              <p>
+                I’m Sajib’s AI representative. Ask about his projects, engineering experience, or
+                skills.
+              </p>
+              <a href="https://sajib.dev.cv/" target="_blank" rel="noopener noreferrer">
+                Explore the portfolio <ArrowUpRight size={14} />
+              </a>
+            </div>
+          )}
           {messages.length === 0 && (
             <div className="sajib-ai-prompts">
               {['Show me Sajib’s projects', 'What is his strongest stack?'].map((prompt) => (
@@ -163,7 +185,11 @@ export function SajibAI() {
           {messages.map((message, index) => (
             <div className={`sajib-ai-message sajib-ai-message-${message.role}`} key={index}>
               <strong>{message.role === 'user' ? 'You' : 'Sajib AI'}</strong>
-              <p>{message.content}</p>
+              {message.role === 'assistant' ? (
+                <AIAnswer content={message.content} />
+              ) : (
+                <p>{message.content}</p>
+              )}
             </div>
           ))}
           {pending && (
@@ -173,6 +199,18 @@ export function SajibAI() {
           )}
           <div ref={messagesEnd} />
         </div>
+        {unread && (
+          <button
+            className="sajib-ai-jump"
+            onClick={() => {
+              nearBottom.current = true;
+              setUnread(false);
+              messagesEnd.current?.scrollIntoView({ block: 'nearest' });
+            }}
+          >
+            New answer ↓
+          </button>
+        )}
         <form
           className="sajib-ai-form"
           onSubmit={(event) => {
@@ -207,8 +245,8 @@ export function SajibAI() {
             </button>
           </div>
           <p className="sajib-ai-note">
-            Only this AI conversation is sent to Sajib’s assistant.{' '}
-            <span>English · বাংলা · Banglish</span>
+            AI can make mistakes. Verify important details.
+            <span>Only messages in this panel go to Sajib’s assistant.</span>
           </p>
         </form>
       </dialog>
