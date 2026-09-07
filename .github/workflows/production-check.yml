@@ -1,0 +1,26 @@
+name: Production browser checks
+
+# Manual only: this creates isolated synthetic test identities on the supplied API.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APP_URL: https://task-chat-mu.vercel.app
+      LIVE_CHAT_TESTS: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      # Deliberately do not upload traces containing live test-session credentials.

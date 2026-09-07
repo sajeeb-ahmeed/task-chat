@@ -87,6 +87,8 @@ PowerShell: `$env:LIVE_CHAT_TESTS='1'; npm run test:e2e`. It exercises three ind
 
 GitHub Actions runs lint, types, unit tests, production build and the default browser suite on pushes and pull requests. Vercel is connected to this repository for deployments.
 
+The manual **Production browser checks** workflow runs the full suite against the hosted app, including the live API journey. It creates synthetic test data and intentionally does not upload credential-bearing traces.
+
 ## Part 3 — Thought process
 
 ### Architecture and trade-offs
