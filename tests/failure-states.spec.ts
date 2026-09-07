@@ -107,3 +107,92 @@ test('expired sessions redirect cleanly instead of exposing stale conversations'
   await expect(page.getByLabel('Your name')).toBeVisible();
   await expect(page.getByRole('button', { name: /Jamie Chen/ })).toHaveCount(0);
 });
+
+test('history shows loading, an access error, and recovers on explicit retry', async ({ page }) => {
+  await mockChat(page);
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let fail = true;
+  await page.route('**/api/conversations/conversation-a/messages?*', async (route) => {
+    await pending;
+    await route.fulfill(
+      fail
+        ? {
+            status: 403,
+            json: { error: { code: 'FORBIDDEN', message: 'Conversation access denied.' } },
+          }
+        : { json: { messages: [], hasMore: false } },
+    );
+  });
+  await page.getByRole('button', { name: /Jamie Chen/ }).click();
+  await expect(page.getByText('Gathering your conversation…')).toBeVisible();
+  release();
+  await expect(page.getByText('Conversation access denied.')).toBeVisible();
+  fail = false;
+  await page.getByRole('button', { name: 'Try again', exact: true }).click();
+  await expect(page.getByText('Every good thread starts')).toBeVisible();
+});
+
+test('a rejected send preserves its draft and an explicit retry succeeds once', async ({
+  page,
+}) => {
+  await mockChat(page);
+  let attempts = 0;
+  await page.route('**/api/messages', (route) => {
+    attempts++;
+    return route.fulfill(
+      attempts === 1
+        ? {
+            status: 400,
+            json: {
+              error: { code: 'VALIDATION_ERROR', message: 'Please try your message again.' },
+            },
+          }
+        : {
+            json: {
+              _id: 'sent-once',
+              conversation: 'conversation-a',
+              sender: 'user-a',
+              text: 'A recoverable thought.',
+              createdAt: '2026-09-07T10:00:00Z',
+            },
+          },
+    );
+  });
+  await page.getByRole('button', { name: /Jamie Chen/ }).click();
+  await page.getByLabel('Write a message').fill('A recoverable thought.');
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  await expect(page.getByText('Please try your message again.')).toBeVisible();
+  await expect(page.getByLabel('Write a message')).toHaveValue('A recoverable thought.');
+  expect(attempts).toBe(1);
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  await expect(page.locator('[data-message-id="sent-once"]')).toHaveCount(1);
+  await expect(page.getByLabel('Write a message')).toHaveValue('');
+  expect(attempts).toBe(2);
+});
+
+test('search hides server internals and recovers when retried', async ({ page }) => {
+  await mockChat(page);
+  let fail = true;
+  await page.route('**/api/users/search?*', (route) =>
+    route.fulfill(
+      fail
+        ? {
+            status: 500,
+            json: { error: { code: 51091, message: 'Private database regex details' } },
+          }
+        : { json: [{ _id: 'friend', name: 'Found Person', phone: '15551112222' }] },
+    ),
+  );
+  await page.getByRole('button', { name: 'New conversation', exact: true }).click();
+  await page.getByLabel('Search people by name or phone').fill('Found Person');
+  await expect(
+    page.getByText('The chat server is having trouble. Please try again shortly.'),
+  ).toBeVisible();
+  await expect(page.getByText('Private database regex details')).toHaveCount(0);
+  fail = false;
+  await page.getByRole('button', { name: 'Try again', exact: true }).click();
+  await expect(page.getByRole('button', { name: /Found Person/ })).toBeVisible();
+});
