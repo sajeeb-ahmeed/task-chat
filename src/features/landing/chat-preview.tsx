@@ -1,10 +1,16 @@
 'use client';
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Check, Plus, Search, Sparkles, RotateCcw } from 'lucide-react';
 import { Avatar } from '@/components/ui';
 export function ChatPreview() {
   const [reading, setReading] = useState(false);
   const [arrived, setArrived] = useState(false);
+  const history = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (!history.current) return;
+    if (arrived && !reading) history.current.scrollTop = history.current.scrollHeight;
+    else if (!arrived) history.current.scrollTop = 0;
+  }, [arrived, reading]);
   function simulate() {
     setReading(true);
     setArrived(true);
@@ -55,7 +61,12 @@ export function ChatPreview() {
             </div>
             <span className="preview-menu">···</span>
           </div>
-          <div className="preview-messages" tabIndex={0} aria-label="Sample message history">
+          <div
+            ref={history}
+            className="preview-messages"
+            tabIndex={0}
+            aria-label="Sample message history"
+          >
             <span className="preview-date">TODAY, A LITTLE EARLIER</span>
             <div className="preview-message">
               <Avatar name="Jamie" size="tiny" />

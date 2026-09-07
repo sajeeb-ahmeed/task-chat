@@ -9,7 +9,7 @@ test('landing preview preserves the reading moment and returns to the new messag
   await page.getByRole('button', { name: 'Send a little hello' }).click();
   await expect(page.getByText('Take your time. Your place is saved.')).toBeVisible();
   await page.getByRole('button', { name: '1 new message' }).click();
-  await expect(page.getByText('Count me in. Same corner café?')).toBeVisible();
+  await expect(page.getByText('Count me in. Same corner café?')).toBeInViewport();
   await page.getByRole('button', { name: 'Reset preview' }).click();
   await expect(page.getByRole('button', { name: 'Send a little hello' })).toBeVisible();
   await page.screenshot({ path: 'tmp/landing-desktop.png', fullPage: true });
