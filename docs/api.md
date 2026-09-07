@@ -59,14 +59,20 @@ Error envelope: `{ error: { message: string, code: string, details?: { path: str
 | History accessed by non-member | 403 `FORBIDDEN` | Show access error; never retain another user's cache |
 | Group with only one other person | 400 `VALIDATION_ERROR` | Require two selected other users |
 | Whitespace-only message | **200 accepted** | Trim and reject empty text on the client |
+| Search with a leading `+` | 500, numeric error code `51091` | Canonicalize phone numbers to country code + digits (no `+`) at both login and search |
+| All-digit search | Exact phone match, not partial name match | Use the complete number; use a name query for discovery |
 | ISO date passed as `before` | 500 `SERVER_ERROR` with ObjectId cast detail | Only send message IDs; do not display raw server internals |
 | GET `/api/health` | 404 `NOT_FOUND` | Do not rely on the documented health route |
 
 The request-focused Swagger omits response schemas/status codes. These observations fill that gap, rather than guessing conventional envelopes/status codes. No server-side idempotency key is documented; a timed-out send can have succeeded. Do not automatically resend a message on timeout.
 
+### Phone and name search workaround
+
+Live tests showed numeric-only `q` performs exact phone matching, while other input enters a name-regex branch. A leading plus sign makes that regex invalid. The frontend keeps country codes but strips `+`, spaces, parentheses, and hyphens before registration and phone lookup; a formatted `+880 ...` input therefore works for accounts created through Thread. Literal name searches escape regex operators. Existing backend accounts stored with a leading `+` cannot be found through its numeric branch: find those users by name. Do not silently impersonate an existing account via login to work around lookup. The unfiltered endpoint is capped at 50 results, so downloading the directory is not a correct fallback.
+
 ## Socket events
 
-The following are documented in Swagger; event payloads and delivery behavior will be verified during integration.
+Live verified: a REST send from one synthetic user reaches another connected user via `message:new`. Unlike the REST object, the event is `{ id, conversation, sender, text, createdAt }`, with a numeric millisecond timestamp. Normalize `id` to `_id` and the timestamp to ISO before merging. `conversation:updated` is documented in Swagger; the app invalidates the conversation list on that event.
 
 | Direction | Event | Contract |
 | --- | --- | --- |

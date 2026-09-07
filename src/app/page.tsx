@@ -31,7 +31,7 @@ export default function Home() {
           </span>
           <h1>
             Good conversations.
-            <br />
+            <br />{' '}
             <span>
               Less <em>everything else.</em>
             </span>
@@ -55,8 +55,7 @@ export default function Home() {
         <div className="hero-annotation">
           <span>
             Less catching up.
-            <br />
-            More being here.
+            <br /> More being here.
           </span>
           <MoveUpRight size={36} strokeWidth={1} />
         </div>
@@ -79,8 +78,7 @@ export default function Home() {
           <span className="eyebrow">CONNECTION, WITHOUT THE CLUTTER</span>
           <h2>
             Everything a conversation needs.
-            <br />
-            <em>Room for what matters.</em>
+            <br /> <em>Room for what matters.</em>
           </h2>
           <p>Small details. A noticeably better feeling.</p>
         </div>
@@ -97,8 +95,7 @@ export default function Home() {
             <h3>A space for just you two.</h3>
             <p>
               Find someone by name or number.
-              <br />
-              Turn a small hello into a good conversation.
+              <br /> Turn a small hello into a good conversation.
             </p>
           </article>
           <article className="feature-card">
@@ -115,8 +112,7 @@ export default function Home() {
             <h3>Bring your people along.</h3>
             <p>
               The weekend crew. The side project.
-              <br />
-              One shared space for the whole group.
+              <br /> One shared space for the whole group.
             </p>
           </article>
           <article className="feature-card">
@@ -131,8 +127,7 @@ export default function Home() {
             <h3>Here, in the moment.</h3>
             <p>
               Messages arrive as the conversation happens.
-              <br />
-              No refresh. Just a natural back-and-forth.
+              <br /> No refresh. Just a natural back-and-forth.
             </p>
           </article>
         </div>
@@ -144,8 +139,7 @@ export default function Home() {
             <span />
             <p>
               “Wait, what was that café
-              <br />
-              you mentioned last week?”
+              <br /> you mentioned last week?”
             </p>
           </div>
           <div className="saved-place">
@@ -162,8 +156,7 @@ export default function Home() {
           <span className="eyebrow">A LITTLE MORE THOUGHTFUL</span>
           <h2>
             Keep the thread.
-            <br />
-            <em>Keep your place.</em>
+            <br /> <em>Keep your place.</em>
           </h2>
           <p>
             Revisiting a good idea? Reading the messages you missed? Take your time. New messages
@@ -182,8 +175,7 @@ export default function Home() {
         <span className="eyebrow light">THERE’S SOMEONE WORTH SAYING HELLO TO</span>
         <h2>
           Good things start
-          <br />
-          with a <em>conversation.</em>
+          <br /> with a <em>conversation.</em>
         </h2>
         <Link href="/login" className="button lime">
           Find your people <ArrowRight size={17} />

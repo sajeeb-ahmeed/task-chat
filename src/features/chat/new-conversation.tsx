@@ -15,6 +15,7 @@ export function NewConversation({
   open: (id: string) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const searchInput = useRef<HTMLInputElement>(null);
   const client = useQueryClient();
   const [group, setGroup] = useState(false);
   const [search, setSearch] = useState('');
@@ -22,9 +23,14 @@ export function NewConversation({
   const [name, setName] = useState('');
   const [selected, setSelected] = useState<User[]>([]);
   useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
     dialog.current?.showModal();
+    searchInput.current?.focus();
     const el = dialog.current;
-    return () => el?.close();
+    return () => {
+      el?.close();
+      if (opener?.isConnected) opener.focus();
+    };
   }, []);
   useEffect(() => {
     const timer = setTimeout(() => setQ(search.trim()), 300);
@@ -114,7 +120,7 @@ export function NewConversation({
       <label className="search-box">
         <Search size={18} />
         <input
-          autoFocus
+          ref={searchInput}
           aria-label="Search people by name or phone"
           placeholder="Search a name or phone number"
           value={search}

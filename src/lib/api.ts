@@ -1,4 +1,5 @@
 import type { Conversation, Message, MessagePage, Session, User } from './types';
+import { normalizePhone, normalizeSearch } from './identity';
 export const API_ORIGIN = (
   process.env.NEXT_PUBLIC_API_ORIGIN || 'https://frontend-task-chatapp.onrender.com'
 ).replace(/\/$/, '');
@@ -50,12 +51,12 @@ export async function request<T>(path: string, token?: string, init?: RequestIni
 const post = (body: unknown): RequestInit => ({ method: 'POST', body: JSON.stringify(body) });
 export const api = {
   login: (phone: string, name: string) =>
-    request<Session>('/auth/login', undefined, post({ phone, name })),
+    request<Session>('/auth/login', undefined, post({ phone: normalizePhone(phone), name })),
   me: (token: string) => request<User>('/auth/me', token),
   conversations: (token: string, signal?: AbortSignal) =>
     request<{ data: Conversation[] }>('/conversations', token, { signal }),
   search: (token: string, q: string, signal?: AbortSignal) =>
-    request<User[]>(`/users/search?q=${encodeURIComponent(q)}`, token, { signal }),
+    request<User[]>(`/users/search?q=${encodeURIComponent(normalizeSearch(q))}`, token, { signal }),
   direct: (token: string, userId: string) =>
     request<{ _id: string }>('/conversations', token, post({ userId })),
   group: (token: string, name: string, participantIds: string[]) =>

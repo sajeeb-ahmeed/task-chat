@@ -47,7 +47,7 @@ export function ChatPanel({
   const follow = useRef(true);
   const initialized = useRef(false);
   const lastSeen = useRef('');
-  const prepend = useRef<{ height: number; top: number } | null>(null);
+  const prepend = useRef<{ id: string; offset: number } | null>(null);
   const [newCount, setNewCount] = useState(0);
   const [showJump, setShowJump] = useState(false);
   const draftKey = `thread.draft.${session.user._id}.${id}`;
@@ -73,7 +73,10 @@ export function ChatPanel({
     const el = scroll.current;
     if (!el) return;
     if (prepend.current && !history.isFetchingNextPage) {
-      el.scrollTop = prepend.current.top + el.scrollHeight - prepend.current.height;
+      const anchor = el.querySelector(
+        `[data-message-id="${CSS.escape(prepend.current.id)}"] .message-row`,
+      );
+      if (anchor) el.scrollTop += anchor.getBoundingClientRect().top - prepend.current.offset;
       prepend.current = null;
     }
     const latest = messages.at(-1)?._id || '';
@@ -113,7 +116,16 @@ export function ChatPanel({
   }
   async function older() {
     const el = scroll.current;
-    if (el) prepend.current = { height: el.scrollHeight, top: el.scrollTop };
+    if (el) {
+      // Anchor the actual message row, not total height: pagination can also
+      // move a date divider or remove the "load earlier" control.
+      const anchor = [...el.querySelectorAll<HTMLElement>('[data-message-id] .message-row')].find(
+        (row) => row.getBoundingClientRect().bottom >= el.getBoundingClientRect().top,
+      );
+      const anchorId = anchor?.closest('[data-message-id]')?.getAttribute('data-message-id');
+      if (anchor && anchorId)
+        prepend.current = { id: anchorId, offset: anchor.getBoundingClientRect().top };
+    }
     await history.fetchNextPage();
   }
   async function send(event?: React.FormEvent) {
@@ -209,6 +221,9 @@ export function ChatPanel({
           ref={scroll}
           onScroll={onScroll}
           aria-label="Message history"
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
           tabIndex={0}
         >
           {history.isPending ? (
