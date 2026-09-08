@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowUpRight, LoaderCircle, MessagesSquare, Users } from 'lucide-react';
+import { LoaderCircle, MessagesSquare, Users } from 'lucide-react';
 export function Brand({ light = false }: { light?: boolean }) {
   return (
     <Link href="/" className={`brand ${light ? 'brand-light' : ''}`} aria-label="Thread home">
@@ -37,7 +37,4 @@ export function Avatar({
 }
 export function Spinner() {
   return <LoaderCircle className="spin" size={18} aria-label="Loading" />;
-}
-export function Arrow() {
-  return <ArrowUpRight size={18} />;
 }

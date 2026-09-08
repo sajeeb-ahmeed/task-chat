@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Providers } from '@/components/providers';
-import { SajibAI } from '@/components/sajib-ai';
 import './globals.css';
 import './refinement.css';
 export const metadata: Metadata = {
@@ -13,7 +12,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         <Providers>{children}</Providers>
-        <SajibAI />
       </body>
     </html>
   );

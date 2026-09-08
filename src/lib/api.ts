@@ -13,12 +13,20 @@ export class ApiError extends Error {
     this.name = 'ApiError';
   }
 }
+const REQUEST_TIMEOUT_MS = 25_000;
+
+function createRequestSignal(signal?: AbortSignal | null): AbortSignal {
+  const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+
+  return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+}
+
 export async function request<T>(path: string, token?: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`${API_ORIGIN}/api${path}`, {
       ...init,
-      signal: init?.signal || AbortSignal.timeout(25000),
+      signal: createRequestSignal(init?.signal),
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
