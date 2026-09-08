@@ -586,11 +586,27 @@ textarea::placeholder {
 /* Product-led landing: editorial hierarchy and a real interactive preview. */
 .landing {
   background: white;
+  padding-top: 86px;
 }
 .landing-nav {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  width: min(1200px, calc(100% - 64px));
   max-width: 1200px;
-  padding: 22px 32px;
-  border-color: var(--line);
+
+  padding: 18px 0;
+
+  background: white;
+}
+@media (max-width: 700px) {
+  .landing-nav {
+    width: calc(100% - 32px);
+    padding: 16px 0;
+  }
 }
 .nav-center {
   color: var(--muted);
